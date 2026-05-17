@@ -765,7 +765,6 @@ const DailyCheckin={
 
     // Reward: day1=1, day2=2, day3=3, day4+=5 (cap at 5)
     const reward=Math.min(streak,5);
-    if(streak>=4)reward===5; // streak keeps going but reward caps at 5
 
     localStorage.setItem(this.KEY,today);
     localStorage.setItem(this.STREAK_KEY,streak);
