@@ -48,6 +48,21 @@ body::before{
 }
 #top-bar .logo span{font-size:28px}
 
+#viral-btns{display:flex;gap:6px;position:relative;z-index:1}
+.viral-btn{
+  background:rgba(255,255,255,.2);backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.25);border-radius:10px;
+  color:#fff;width:32px;height:32px;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;position:relative;
+  transition:background .2s,transform .1s;
+}
+.viral-btn:active{transform:scale(.9)}
+.viral-btn:hover{background:rgba(255,255,255,.3)}
+.viral-btn .badge{
+  position:absolute;top:-4px;right:-4px;width:14px;height:14px;
+  background:#ff4444;border-radius:50%;border:2px solid #e94560;
+}
+
 #stats{display:flex;gap:6px;position:relative;z-index:1}
 .stat-box{
   background:rgba(255,255,255,.2);backdrop-filter:blur(8px);
@@ -63,6 +78,14 @@ body::before{
   color:#fff;width:28px;height:28px;border-radius:50%;font-size:14px;
   font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;
 }
+
+/* ===== 奖励提示条 ===== */
+#bonus-bar{
+  display:none;background:linear-gradient(90deg,#00b894,#55efc4);border-radius:14px;
+  padding:8px 14px;text-align:center;color:#1a1a2e;font-size:14px;font-weight:700;
+  box-shadow:0 4px 16px rgba(0,184,148,.3);
+}
+#bonus-bar.show{display:block;animation:popIn .3s ease}
 
 /* ===== 许愿色 ===== */
 #wish-bar{
@@ -226,6 +249,14 @@ body::before{
 .rs-item .rv{font-size:26px;font-weight:800;color:#ffd200}
 .rs-item .rl{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
 #result-modal .r-msg{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:16px}
+#result-modal .r-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;justify-content:center}
+.r-action-btn{
+  padding:10px 16px;border:none;border-radius:12px;font-size:14px;font-weight:700;
+  cursor:pointer;transition:transform .1s;
+}
+.r-action-btn:active{transform:scale(.95)}
+.r-action-btn.share-btn{background:linear-gradient(135deg,#636e72,#b2bec3);color:#fff}
+.r-action-btn.invite-btn{background:linear-gradient(135deg,#00b894,#55efc4);color:#1a1a2e}
 
 /* ===== 浮动消息 ===== */
 .float-msg{
@@ -280,12 +311,107 @@ body::before{
   100%{transform:translateY(100vh) scale(0);opacity:0}
 }
 
+/* ===== 邀请链接弹窗 ===== */
+#invite-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+  display:none;justify-content:center;align-items:center;z-index:350;
+}
+#invite-overlay.show{display:flex}
+#invite-modal{
+  background:linear-gradient(145deg,#2d2d44,#1a1a2e);border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;padding:28px 22px;max-width:340px;width:92%;text-align:center;
+  animation:popIn .3s cubic-bezier(.34,1.56,.64,1);color:#fff;
+}
+#invite-modal h2{font-size:20px;color:#ffd200;margin-bottom:12px}
+#invite-modal .inv-desc{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:16px}
+.invite-link-box{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:10px;font-size:12px;color:#55efc4;
+  word-break:break-all;margin-bottom:14px;min-height:40px;display:flex;align-items:center;justify-content:center;
+}
+.inv-copy-btn{
+  padding:10px 32px;border:none;border-radius:12px;font-size:15px;font-weight:700;
+  cursor:pointer;background:linear-gradient(135deg,#e94560,#ff6b6b);color:#fff;
+  transition:transform .1s;
+}
+.inv-copy-btn:active{transform:scale(.95)}
+.inv-reward-info{margin-top:14px;font-size:12px;color:rgba(255,255,255,.5)}
+.inv-reward-info span{color:#ffd200;font-weight:700}
+.inv-close-btn{
+  display:block;margin:16px auto 0;padding:8px 28px;border:none;border-radius:12px;
+  font-size:14px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.15);color:#fff;
+}
+
+/* ===== 签到弹窗 ===== */
+#checkin-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+  display:none;justify-content:center;align-items:center;z-index:350;
+}
+#checkin-overlay.show{display:flex}
+#checkin-modal{
+  background:linear-gradient(145deg,#2d2d44,#1a1a2e);border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;padding:28px 22px;max-width:340px;width:92%;text-align:center;
+  animation:popIn .3s cubic-bezier(.34,1.56,.64,1);color:#fff;
+}
+#checkin-modal h2{font-size:20px;color:#ffd200;margin-bottom:8px}
+.checkin-days{font-size:40px;font-weight:900;color:#55efc4;margin:12px 0}
+.checkin-reward{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:16px}
+.checkin-reward span{color:#ffd200;font-weight:700}
+.checkin-close-btn{
+  padding:10px 32px;border:none;border-radius:12px;font-size:15px;font-weight:700;
+  cursor:pointer;background:linear-gradient(135deg,#e94560,#ff6b6b);color:#fff;
+}
+
+/* ===== 排行榜弹窗 ===== */
+#leaderboard-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+  display:none;justify-content:center;align-items:center;z-index:350;
+}
+#leaderboard-overlay.show{display:flex}
+#leaderboard-modal{
+  background:linear-gradient(145deg,#2d2d44,#1a1a2e);border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;padding:28px 22px;max-width:360px;width:92%;text-align:center;
+  animation:popIn .3s cubic-bezier(.34,1.56,.64,1);color:#fff;max-height:80vh;overflow-y:auto;
+}
+#leaderboard-modal h2{font-size:20px;color:#ffd200;margin-bottom:16px}
+.lb-table{width:100%;border-collapse:collapse;font-size:12px}
+.lb-table th{padding:6px 4px;color:rgba(255,255,255,.5);border-bottom:1px solid rgba(255,255,255,.1);font-weight:600}
+.lb-table td{padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.04)}
+.lb-table tr:nth-child(even){background:rgba(255,255,255,.02)}
+.lb-table .rank-1{color:#FFD700;font-weight:800}
+.lb-table .rank-2{color:#C0C0C0;font-weight:700}
+.lb-table .rank-3{color:#CD7F32;font-weight:700}
+.lb-empty{color:rgba(255,255,255,.4);font-size:14px;padding:20px 0}
+.lb-record-break{
+  background:linear-gradient(90deg,#ffd200,#f7971e);color:#1a1a2e;
+  border-radius:12px;padding:10px;font-weight:800;font-size:15px;margin-bottom:14px;
+  animation:comboPulse .5s ease;
+}
+.lb-close-btn{
+  display:block;margin:16px auto 0;padding:10px 32px;border:none;border-radius:12px;
+  font-size:15px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#636e72,#b2bec3);color:#fff;
+}
+
+/* ===== 分享卡片画布 ===== */
+#share-canvas-wrap{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
+  display:none;justify-content:center;align-items:center;z-index:500;flex-direction:column;gap:12px;
+}
+#share-canvas-wrap.show{display:flex}
+#share-canvas-wrap canvas{max-width:90%;max-height:70vh;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.share-hint{color:rgba(255,255,255,.7);font-size:14px;text-align:center}
+.share-close-btn{
+  padding:10px 32px;border:none;border-radius:12px;font-size:15px;font-weight:700;
+  cursor:pointer;background:linear-gradient(135deg,#e94560,#ff6b6b);color:#fff;
+}
+
 @media(max-width:380px){
   .wc-btn{width:24px;height:24px}
   #top-bar .logo{font-size:18px}
   .stat-box .sv{font-size:17px}
   .stat-box{min-width:48px;padding:4px 6px}
   #grid{gap:6px}
+  .viral-btn{width:28px;height:28px;font-size:14px}
 }
 </style>
 </head>
@@ -296,6 +422,11 @@ body::before{
 <div id="app">
   <div id="top-bar">
     <div class="logo"><span>&#x1F422;</span> 乌龟对对碰</div>
+    <div id="viral-btns">
+      <button class="viral-btn" id="btn-checkin" title="每日签到">&#x1F4C5;</button>
+      <button class="viral-btn" id="btn-leaderboard" title="排行榜">&#x1F3C6;</button>
+      <button class="viral-btn" id="btn-invite" title="邀请好友">&#x1F517;</button>
+    </div>
     <div id="stats">
       <div class="stat-box"><div class="sv" id="s-bags">0</div><div class="sl">剩余</div></div>
       <div class="stat-box"><div class="sv" id="s-opened">0</div><div class="sl">已拆</div></div>
@@ -303,6 +434,8 @@ body::before{
     </div>
     <button id="btn-rules">?</button>
   </div>
+
+  <div id="bonus-bar"></div>
 
   <div id="wish-bar">
     <span class="wish-label">&#x1F3AF; 许愿:</span>
@@ -335,11 +468,11 @@ body::before{
 <div id="rules-overlay" class="modal-overlay">
   <div class="modal-box">
     <h2>&#x1F422; 游戏规则</h2>
-    <div class="rule-item"><span class="rule-icon">&#x1F3AF;</span><div><div class="rule-title">许愿色 +1袋</div><div class="rule-desc">拆出许愿色 → 额外获得1袋</div></div></div>
-    <div class="rule-item"><span class="rule-icon">&#x1F525;</span><div><div class="rule-title">同色碰 +1袋</div><div class="rule-desc">出现两只同色乌龟 → 消除并 +1袋</div></div></div>
-    <div class="rule-item"><span class="rule-icon">&#x1F389;</span><div><div class="rule-title">三连 +3袋</div><div class="rule-desc">横/竖/斜三连同色 → 消除并 +3袋</div></div></div>
-    <div class="rule-item"><span class="rule-icon">&#x1F308;</span><div><div class="rule-title">全家福 +3袋</div><div class="rule-desc">场上出现 8 种不同颜色的乌龟 → +3袋</div></div></div>
-    <div class="rule-item"><span class="rule-icon">&#x1F3C6;</span><div><div class="rule-title">清台 +5袋</div><div class="rule-desc">九宫格全部清空 → 超级大奖 +5袋!</div></div></div>
+    <div class="rule-item"><span class="rule-icon">&#x1F3AF;</span><div><div class="rule-title">许愿色 +1袋</div><div class="rule-desc">拆出许愿色 &#x2192; 额外获得1袋</div></div></div>
+    <div class="rule-item"><span class="rule-icon">&#x1F525;</span><div><div class="rule-title">同色碰 +1袋</div><div class="rule-desc">出现两只同色乌龟 &#x2192; 消除并 +1袋</div></div></div>
+    <div class="rule-item"><span class="rule-icon">&#x1F389;</span><div><div class="rule-title">三连 +3袋</div><div class="rule-desc">横/竖/斜三连同色 &#x2192; 消除并 +3袋</div></div></div>
+    <div class="rule-item"><span class="rule-icon">&#x1F308;</span><div><div class="rule-title">全家福 +3袋</div><div class="rule-desc">场上出现 8 种不同颜色的乌龟 &#x2192; +3袋</div></div></div>
+    <div class="rule-item"><span class="rule-icon">&#x1F3C6;</span><div><div class="rule-title">清台 +5袋</div><div class="rule-desc">九宫格全部清空 &#x2192; 超级大奖 +5袋!</div></div></div>
     <div class="rule-item"><span class="rule-icon">&#x267E;&#xFE0F;</span><div><div class="rule-title">连锁反应</div><div class="rule-desc">奖励的袋子继续拆，满足条件就一直拆!</div></div></div>
     <button class="modal-close-btn" id="rules-close">知道了</button>
   </div>
@@ -358,7 +491,49 @@ body::before{
     </div>
     <p class="r-msg" id="r-msg"></p>
     <button class="btn btn-start" id="r-btn" style="min-width:180px;margin:0 auto">&#x1F3AE; 再来一局</button>
+    <div class="r-btns">
+      <button class="r-action-btn share-btn" id="r-share">&#x1F4F8; 分享成绩</button>
+      <button class="r-action-btn invite-btn" id="r-invite">&#x1F91D; 邀请好友玩</button>
+    </div>
   </div>
+</div>
+
+<!-- 邀请弹窗 -->
+<div id="invite-overlay" class="modal-overlay">
+  <div id="invite-modal">
+    <h2>&#x1F517; 邀请好友</h2>
+    <p class="inv-desc">分享链接给好友，好友通过链接打开游戏，你即可获 +2 袋奖励!</p>
+    <div class="invite-link-box" id="invite-link-text"></div>
+    <button class="inv-copy-btn" id="inv-copy-btn">&#x1F4CB; 复制链接</button>
+    <div class="inv-reward-info">已邀请 <span id="inv-count">0</span> 位好友，累计奖励 <span id="inv-reward-total">0</span> 袋</div>
+    <button class="inv-close-btn" id="inv-close">关闭</button>
+  </div>
+</div>
+
+<!-- 签到弹窗 -->
+<div id="checkin-overlay" class="modal-overlay">
+  <div id="checkin-modal">
+    <h2 id="checkin-title">&#x1F4C5; 每日签到</h2>
+    <div class="checkin-days" id="checkin-days"></div>
+    <div class="checkin-reward" id="checkin-reward"></div>
+    <button class="checkin-close-btn" id="checkin-close">&#x2705; 领取奖励</button>
+  </div>
+</div>
+
+<!-- 排行榜弹窗 -->
+<div id="leaderboard-overlay" class="modal-overlay">
+  <div id="leaderboard-modal">
+    <h2>&#x1F3C6; 排行榜</h2>
+    <div id="lb-content"></div>
+    <button class="lb-close-btn" id="lb-close">关闭</button>
+  </div>
+</div>
+
+<!-- 分享画布 -->
+<div id="share-canvas-wrap">
+  <canvas id="share-canvas"></canvas>
+  <div class="share-hint">&#x1F446; 长按保存图片，然后分享给好友</div>
+  <button class="share-close-btn" id="share-close">关闭</button>
 </div>
 
 <button id="sound-toggle" title="音效开关">&#x1F50A;</button>
@@ -427,7 +602,6 @@ const TRIPLES=[
 //  SVG TURTLE GENERATOR
 // ============================================================
 function turtleSVG(hex){
-  // 颜色计算
   const rgb=hexToRgb(hex);
   const dark=shadeColor(hex,-35);
   const dk2=shadeColor(hex,-55);
@@ -436,7 +610,6 @@ function turtleSVG(hex){
   const rim=shadeColor(hex,-20);
   const shellMid=shadeColor(hex,-10);
 
-  // 定义渐变
   const gid='g'+Math.random().toString(36).substr(2,6);
   const lid='l'+Math.random().toString(36).substr(2,6);
 
@@ -451,75 +624,41 @@ function turtleSVG(hex){
         '<stop offset="100%" stop-color="'+light+'"/>'+
       '</linearGradient>'+
     '</defs>'+
-
-    // ===== 尾巴 =====
     '<path d="M96 64 Q102 60 108 58 Q104 62 106 66 Q100 68 96 66Z" fill="'+dark+'" stroke="'+dk2+'" stroke-width=".5"/>'+
-
-    // ===== 后腿 =====
     '<ellipse cx="86" cy="84" rx="13" ry="6" fill="url(#'+gid+')" stroke="'+dark+'" stroke-width=".5" transform="rotate(-25,86,84)"/>'+
     '<ellipse cx="86" cy="36" rx="13" ry="6" fill="url(#'+gid+')" stroke="'+dark+'" stroke-width=".5" transform="rotate(25,86,36)"/>'+
-    // 脚趾
     '<circle cx="95" cy="89" r="2.5" fill="'+dark+'"/>'+
     '<circle cx="99" cy="86" r="2.2" fill="'+dark+'"/>'+
     '<circle cx="95" cy="31" r="2.5" fill="'+dark+'"/>'+
     '<circle cx="99" cy="34" r="2.2" fill="'+dark+'"/>'+
-
-    // ===== 前腿 =====
     '<ellipse cx="40" cy="86" rx="14" ry="6.5" fill="url(#'+gid+')" stroke="'+dark+'" stroke-width=".5" transform="rotate(-20,40,86)"/>'+
     '<ellipse cx="40" cy="34" rx="14" ry="6.5" fill="url(#'+gid+')" stroke="'+dark+'" stroke-width=".5" transform="rotate(20,40,34)"/>'+
-    // 脚趾
     '<circle cx="28" cy="92" r="2.8" fill="'+dark+'"/>'+
     '<circle cx="24" cy="88" r="2.5" fill="'+dark+'"/>'+
     '<circle cx="28" cy="28" r="2.8" fill="'+dark+'"/>'+
     '<circle cx="24" cy="32" r="2.5" fill="'+dark+'"/>'+
-
-    // ===== 头部 =====
     '<ellipse cx="20" cy="60" rx="15" ry="14" fill="url(#'+lid+')" stroke="'+rim+'" stroke-width=".8"/>'+
-    // 头顶
     '<ellipse cx="20" cy="50" rx="12" ry="6" fill="'+lt2+'" opacity=".4"/>'+
-
-    // ===== 眼睛 (大眼萌) =====
-    // 左眼白
     '<ellipse cx="15" cy="56" rx="5" ry="5.5" fill="#fff" stroke="'+shadeColor(hex,-15)+'" stroke-width=".3"/>'+
-    // 左瞳孔
     '<circle cx="14" cy="56.5" r="3.2" fill="#2C2C2C"/>'+
     '<circle cx="15.5" cy="55" r="1.4" fill="#fff"/>'+
     '<circle cx="12.5" cy="57.5" r=".6" fill="#fff"/>'+
-
-    // 右眼白
     '<ellipse cx="27" cy="56" rx="5" ry="5.5" fill="#fff" stroke="'+shadeColor(hex,-15)+'" stroke-width=".3"/>'+
-    // 右瞳孔
     '<circle cx="26" cy="56.5" r="3.2" fill="#2C2C2C"/>'+
     '<circle cx="27.5" cy="55" r="1.4" fill="#fff"/>'+
     '<circle cx="24.5" cy="57.5" r=".6" fill="#fff"/>'+
-
-    // ===== 腮红 =====
     '<ellipse cx="10" cy="63" rx="4" ry="2.5" fill="#FF8A80" opacity=".45"/>'+
     '<ellipse cx="30" cy="63" rx="4" ry="2.5" fill="#FF8A80" opacity=".45"/>'+
-
-    // ===== 嘴巴 =====
     '<path d="M17 64 Q20 68 23 64" stroke="#5D4037" stroke-width="1.2" fill="none" stroke-linecap="round"/>'+
-
-    // ===== 龟壳 (主壳) =====
     '<ellipse cx="62" cy="60" rx="36" ry="28" fill="url(#'+gid+')" stroke="'+rim+'" stroke-width="1.5"/>'+
-    // 壳高光
     '<ellipse cx="50" cy="46" rx="16" ry="10" fill="'+lt2+'" opacity=".45" transform="rotate(-12,50,46)"/>'+
     '<ellipse cx="52" cy="44" rx="8" ry="5" fill="'+lt2+'" opacity=".3" transform="rotate(-12,52,44)"/>'+
-
-    // ===== 壳面花纹 =====
-    // 中心六边形
     '<polygon points="62,40 74,47 74,59 62,66 50,59 50,47" fill="none" stroke="'+dk2+'" stroke-width="1.8" opacity=".35"/>'+
     '<polygon points="62,44 70,49 70,57 62,62 54,57 54,49" fill="'+dk2+'" opacity=".1"/>'+
-    // 左六边形
     '<polygon points="46,52 54,47 54,59 46,64 38,59 38,47" fill="none" stroke="'+dk2+'" stroke-width="1.2" opacity=".2"/>'+
-    // 右六边形
     '<polygon points="78,52 86,47 86,59 78,64 70,59 70,47" fill="none" stroke="'+dk2+'" stroke-width="1.2" opacity=".2"/>'+
-    // 上六边形
     '<polygon points="62,34 70,39 70,47 62,52 54,47 54,39" fill="none" stroke="'+dk2+'" stroke-width="1" opacity=".15"/>'+
-    // 下六边形
     '<polygon points="62,68 70,63 70,71 62,76 54,71 54,63" fill="none" stroke="'+dk2+'" stroke-width="1" opacity=".15"/>'+
-
-    // 壳缘装饰点
     '<circle cx="30" cy="50" r="2" fill="'+dk2+'" opacity=".2"/>'+
     '<circle cx="30" cy="70" r="2" fill="'+dk2+'" opacity=".2"/>'+
     '<circle cx="94" cy="50" r="2" fill="'+dk2+'" opacity=".2"/>'+
@@ -527,13 +666,8 @@ function turtleSVG(hex){
   '</svg>';
 }
 
-// 颜色工具
 function hexToRgb(hex){
-  return{
-    r:parseInt(hex.slice(1,3),16),
-    g:parseInt(hex.slice(3,5),16),
-    b:parseInt(hex.slice(5,7),16)
-  };
+  return{r:parseInt(hex.slice(1,3),16),g:parseInt(hex.slice(3,5),16),b:parseInt(hex.slice(5,7),16)};
 }
 
 function shadeColor(hex,pct){
@@ -542,6 +676,233 @@ function shadeColor(hex,pct){
   let b=Math.min(255,Math.max(0,parseInt(hex.slice(5,7),16)+pct));
   return 'rgb('+r+','+g+','+b+')';
 }
+
+// ============================================================
+//  VIRAL MODULE
+// ============================================================
+const Viral={
+  STORAGE_KEY:'turtle_player_id',
+  REF_KEY:'turtle_ref_claimed',
+  INVITE_COUNT_KEY:'turtle_invite_count',
+  INVITE_REWARD_KEY:'turtle_invite_reward_total',
+
+  getPlayerId(){
+    let id=localStorage.getItem(this.STORAGE_KEY);
+    if(!id){
+      id='T'+Date.now().toString(36)+Math.random().toString(36).substr(2,4);
+      localStorage.setItem(this.STORAGE_KEY,id);
+    }
+    return id;
+  },
+
+  getInviteUrl(){
+    const base=window.location.href.split('?')[0].split('#')[0];
+    return base+'?ref='+this.getPlayerId();
+  },
+
+  checkRef(){
+    // Check if we came via a ref link and haven't claimed yet
+    if(localStorage.getItem(this.REF_KEY))return 0;
+    const params=new URLSearchParams(window.location.search);
+    const ref=params.get('ref');
+    if(ref&&ref.length>2){
+      localStorage.setItem(this.REF_KEY,'1');
+      localStorage.setItem('turtle_ref_from',ref);
+      return 2; // +2 bags
+    }
+    return 0;
+  },
+
+  getInviteCount(){return parseInt(localStorage.getItem(this.INVITE_COUNT_KEY)||'0')},
+  getInviteRewardTotal(){return parseInt(localStorage.getItem(this.INVITE_REWARD_KEY)||'0')},
+
+  addInviteReward(count){
+    const cur=this.getInviteCount();
+    const total=this.getInviteRewardTotal();
+    localStorage.setItem(this.INVITE_COUNT_KEY,cur+count);
+    localStorage.setItem(this.INVITE_REWARD_KEY,total+count*2);
+  },
+
+  recordInvite(){
+    // Simulated: when a new player opens via ref, the referrer gets credit
+    // In pure frontend, we record locally for display only
+    const count=this.getInviteCount();
+    localStorage.setItem(this.INVITE_COUNT_KEY,count);
+  }
+};
+
+// ============================================================
+//  DAILY CHECKIN MODULE
+// ============================================================
+const DailyCheckin={
+  KEY:'turtle_checkin_date',
+  STREAK_KEY:'turtle_checkin_streak',
+
+  getToday(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()},
+
+  getYesterday(){const d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()},
+
+  getStreak(){return parseInt(localStorage.getItem(this.STREAK_KEY)||'0')},
+
+  canCheckin(){
+    const last=localStorage.getItem(this.KEY);
+    return last!==this.getToday();
+  },
+
+  doCheckin(){
+    const today=this.getToday();
+    const last=localStorage.getItem(this.KEY);
+    let streak=this.getStreak();
+
+    if(last===today)return{done:true,reward:0,streak}; // already checked in
+
+    // Check if consecutive
+    if(last===this.getYesterday()){
+      streak++;
+    }else{
+      streak=1;
+    }
+
+    // Reward: day1=1, day2=2, day3=3, day4+=5 (cap at 5)
+    const reward=Math.min(streak,5);
+    if(streak>=4)reward===5; // streak keeps going but reward caps at 5
+
+    localStorage.setItem(this.KEY,today);
+    localStorage.setItem(this.STREAK_KEY,streak);
+
+    return{done:false,reward,streak};
+  },
+
+  getRewardText(streak,reward){
+    if(streak>=7)return'连续签到第'+streak+'天，太棒了!';
+    if(streak>=3)return'连续签到第'+streak+'天，越来越多了!';
+    if(streak>=2)return'连续签到第'+streak+'天，再接再厉!';
+    return'首次签到';
+  }
+};
+
+// ============================================================
+//  LEADERBOARD MODULE
+// ============================================================
+const Leaderboard={
+  KEY:'turtle_scores',
+  MAX:10,
+
+  getScores(){
+    try{return JSON.parse(localStorage.getItem(this.KEY))||[]}catch(e){return[]}
+  },
+
+  saveScore(score){
+    const scores=this.getScores();
+    scores.push({
+      date:new Date().toLocaleDateString('zh-CN'),
+      opened:score.opened,
+      earned:score.earned,
+      match:score.match,
+      triple:score.triple,
+    });
+    scores.sort((a,b)=>b.earned-a.earned);
+    if(scores.length>this.MAX)scores.length=this.MAX;
+    localStorage.setItem(this.KEY,JSON.stringify(scores));
+    return scores;
+  },
+
+  isRecord(score){
+    const scores=this.getScores();
+    if(scores.length<this.MAX)return true;
+    return score.earned>scores[scores.length-1].earned;
+  },
+
+  getTop(){return this.getScores().slice(0,this.MAX)}
+};
+
+// ============================================================
+//  SHARE CARD MODULE
+// ============================================================
+const ShareCard={
+  draw(score){
+    const wrap=document.getElementById('share-canvas-wrap');
+    const canvas=document.getElementById('share-canvas');
+    const dpr=2;
+    const W=360,H=520;
+    canvas.width=W*dpr;canvas.height=H*dpr;
+    canvas.style.width=W+'px';canvas.style.height=H+'px';
+    const ctx=canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
+
+    // Background gradient
+    const grad=ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,'#1a1a2e');
+    grad.addColorStop(0.5,'#16213e');
+    grad.addColorStop(1,'#0f3460');
+    ctx.fillStyle=grad;
+    this.roundRect(ctx,0,0,W,H,20);ctx.fill();
+
+    // Border
+    ctx.strokeStyle='rgba(233,69,96,.5)';ctx.lineWidth=2;
+    this.roundRect(ctx,1,1,W-2,H-2,20);ctx.stroke();
+
+    // Top accent bar
+    ctx.fillStyle='#e94560';
+    ctx.beginPath();
+    ctx.moveTo(0,20);ctx.arcTo(0,0,20,0,20);ctx.lineTo(W-20,0);ctx.arcTo(W,0,W,20,20);
+    ctx.lineTo(W,70);ctx.lineTo(0,70);ctx.closePath();ctx.fill();
+
+    // Title
+    ctx.fillStyle='#fff';ctx.font='bold 24px sans-serif';ctx.textAlign='center';
+    ctx.fillText('🐢 乌龟对对碰',W/2,42);
+
+    // Score data
+    ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='14px sans-serif';
+    ctx.fillText('— 游戏成绩 —',W/2,95);
+
+    const data=[
+      ['共拆',score.opened],
+      ['获得',score.earned],
+      ['对碰',score.match],
+      ['三连',score.triple],
+    ];
+
+    const startX=30,startY=120,colW=(W-60)/2,rowH=70;
+    data.forEach(([label,val],i)=>{
+      const col=i%2,row=Math.floor(i/2);
+      const x=startX+col*(colW+12);
+      const y=startY+row*(rowH+10);
+
+      ctx.fillStyle='rgba(255,255,255,.06)';
+      this.roundRect(ctx,x,y,colW,rowH,12);ctx.fill();
+
+      ctx.fillStyle='#ffd200';ctx.font='bold 32px sans-serif';ctx.textAlign='center';
+      ctx.fillText(val,x+colW/2,y+40);
+
+      ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='13px sans-serif';
+      ctx.fillText(label,x+colW/2,y+60);
+    });
+
+    // QR placeholder
+    const qrSize=80,qrX=(W-qrSize)/2,qrY=355;
+    ctx.fillStyle='rgba(255,255,255,.1)';
+    this.roundRect(ctx,qrX,qrY,qrSize,qrSize,8);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('扫码一起玩',W/2,qrY+45);
+
+    // Footer
+    ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('微信扫一扫 搜索 乌龟对对碰',W/2,qrY+qrSize+20);
+
+    wrap.classList.add('show');
+  },
+
+  roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+    ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+    ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+    ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
+    ctx.closePath();
+  }
+};
 
 // ============================================================
 //  GAME
@@ -553,7 +914,10 @@ class Game{
     this.wishColor=null;this.bagsLeft=0;this.totalOpened=0;this.totalEarned=0;
     this.totalMatch=0;this.totalTriple=0;this.totalFamily=0;this.combo=0;
     this.running=false;this.busy=false;this.familyTriggered=false;
+    this.bonusBags=0;this.bonusMsg='';
+
     this.buildGrid();this.buildWishColors();Sound.init();
+    this.initViral();
 
     this.$('btn-start').addEventListener('click',()=>this.start());
     this.$('btn-open').addEventListener('click',()=>{Sound.resume();this.openOne()});
@@ -563,10 +927,151 @@ class Game{
     this.$('rules-close').addEventListener('click',()=>this.$('rules-overlay').classList.remove('show'));
     this.$('rules-overlay').addEventListener('click',e=>{if(e.target===this.$('rules-overlay'))this.$('rules-overlay').classList.remove('show')});
     this.$('sound-toggle').addEventListener('click',()=>this.toggleSound());
+
+    // Viral buttons
+    this.$('btn-checkin').addEventListener('click',()=>this.showCheckin());
+    this.$('btn-leaderboard').addEventListener('click',()=>this.showLeaderboard());
+    this.$('btn-invite').addEventListener('click',()=>this.showInvite());
+    this.$('r-share').addEventListener('click',()=>this.shareScore());
+    this.$('r-invite').addEventListener('click',()=>{this.$('result-overlay').classList.remove('show');this.showInvite()});
+    this.$('inv-close').addEventListener('click',()=>this.$('invite-overlay').classList.remove('show'));
+    this.$('inv-copy-btn').addEventListener('click',()=>this.copyInviteLink());
+    this.$('checkin-close').addEventListener('click',()=>this.$('checkin-overlay').classList.remove('show'));
+    this.$('lb-close').addEventListener('click',()=>this.$('leaderboard-overlay').classList.remove('show'));
+    this.$('share-close').addEventListener('click',()=>this.$('share-canvas-wrap').classList.remove('show'));
+    this.$('invite-overlay').addEventListener('click',e=>{if(e.target===this.$('invite-overlay'))this.$('invite-overlay').classList.remove('show')});
+    this.$('checkin-overlay').addEventListener('click',e=>{if(e.target===this.$('checkin-overlay'))this.$('checkin-overlay').classList.remove('show')});
+    this.$('leaderboard-overlay').addEventListener('click',e=>{if(e.target===this.$('leaderboard-overlay'))this.$('leaderboard-overlay').classList.remove('show')});
+
     document.addEventListener('click',()=>Sound.resume(),{once:true});
   }
 
-  toggleSound(){Sound.enabled=!Sound.enabled;this.$('sound-toggle').textContent=Sound.enabled?'\u{1F50A}':'\u{1F507}'}
+  initViral(){
+    // Generate player ID
+    Viral.getPlayerId();
+
+    // Check if came via ref link
+    const refBonus=Viral.checkRef();
+    if(refBonus>0){
+      this.bonusBags=refBonus;
+      this.bonusMsg='🎁 好友邀请奖励: +'+refBonus+'袋!';
+    }
+
+    // Update invite count display
+    this.$('inv-count').textContent=Viral.getInviteCount();
+    this.$('inv-reward-total').textContent=Viral.getInviteRewardTotal();
+
+    // Checkin badge
+    this.updateCheckinBadge();
+  }
+
+  updateCheckinBadge(){
+    const btn=this.$('btn-checkin');
+    if(DailyCheckin.canCheckin()){
+      if(!btn.querySelector('.badge')){
+        const b=document.createElement('span');b.className='badge';
+        btn.appendChild(b);
+      }
+    }else{
+      const b=btn.querySelector('.badge');
+      if(b)b.remove();
+    }
+  }
+
+  showInvite(){
+    this.$('invite-link-text').textContent=Viral.getInviteUrl();
+    this.$('inv-count').textContent=Viral.getInviteCount();
+    this.$('inv-reward-total').textContent=Viral.getInviteRewardTotal();
+    this.$('invite-overlay').classList.add('show');
+  }
+
+  copyInviteLink(){
+    const url=Viral.getInviteUrl();
+    const text='🐢 来玩乌龟对对碰! 点击链接: '+url;
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=>{
+        const btn=this.$('inv-copy-btn');
+        btn.textContent='✅ 已复制!';
+        setTimeout(()=>{btn.textContent='💻 复制链接'},1500);
+      }).catch(()=>{
+        // Fallback
+        const ta=document.createElement('textarea');ta.value=text;
+        document.body.appendChild(ta);ta.select();document.execCommand('copy');
+        document.body.removeChild(ta);
+        const btn=this.$('inv-copy-btn');
+        btn.textContent='✅ 已复制!';
+        setTimeout(()=>{btn.textContent='💻 复制链接'},1500);
+      });
+    }
+  }
+
+  showCheckin(){
+    const result=DailyCheckin.doCheckin();
+    const titleEl=this.$('checkin-title');
+    const daysEl=this.$('checkin-days');
+    const rewardEl=this.$('checkin-reward');
+    const closeBtn=this.$('checkin-close');
+
+    if(result.done){
+      titleEl.textContent='📅 已签到';
+      daysEl.textContent='✅';
+      rewardEl.innerHTML='今天已经签到过了，明天再来吧!';
+      closeBtn.textContent='关闭';
+      closeBtn.onclick=()=>this.$('checkin-overlay').classList.remove('show');
+    }else{
+      titleEl.textContent='📅 签到成功!';
+      daysEl.textContent='第'+result.streak+'天';
+      rewardEl.innerHTML='获得 <span>+'+result.reward+'袋</span> 奖励! '+DailyCheckin.getRewardText(result.streak,result.reward);
+
+      // Add bonus bags for next game
+      this.bonusBags+=result.reward;
+      if(this.bonusMsg)this.bonusMsg+='\n';
+      this.bonusMsg+='📅 签到奖励: +'+result.reward+'袋!';
+
+      closeBtn.textContent='✅ 太棒了!';
+      closeBtn.onclick=()=>{
+        this.$('checkin-overlay').classList.remove('show');
+        this.updateCheckinBadge();
+        this.showBonusBar();
+      };
+    }
+    this.$('checkin-overlay').classList.add('show');
+  }
+
+  showLeaderboard(){
+    const top=Leaderboard.getTop();
+    const content=this.$('lb-content');
+
+    if(top.length===0){
+      content.innerHTML='<div class="lb-empty">暂无记录，快来玩几局吧!</div>';
+    }else{
+      let html='<table class="lb-table"><tr><th>#</th><th>日期</th><th>共拆</th><th>获得</th><th>对碰</th><th>三连</th></tr>';
+      top.forEach((s,i)=>{
+        const rankClass=i<3?'rank-'+(i+1):'';
+        const medals=['🥇','🥈','🥉'];
+        const rank=i<3?medals[i]:(i+1);
+        html+='<tr><td class="'+rankClass+'">'+rank+'</td><td>'+s.date+'</td><td>'+s.opened+'</td><td class="'+rankClass+'">'+s.earned+'</td><td>'+s.match+'</td><td>'+s.triple+'</td></tr>';
+      });
+      html+='</table>';
+      content.innerHTML=html;
+    }
+    this.$('leaderboard-overlay').classList.add('show');
+  }
+
+  shareScore(){
+    const score={opened:this.totalOpened,earned:this.totalEarned,match:this.totalMatch,triple:this.totalTriple};
+    ShareCard.draw(score);
+  }
+
+  showBonusBar(){
+    if(this.bonusMsg){
+      const bar=this.$('bonus-bar');
+      bar.textContent=this.bonusMsg;
+      bar.classList.add('show');
+    }
+  }
+
+  toggleSound(){Sound.enabled=!Sound.enabled;this.$('sound-toggle').textContent=Sound.enabled?'🔊':'🔇'}
 
   buildGrid(){
     const g=this.$('grid');g.innerHTML='';this.gridEls=[];
@@ -596,7 +1101,8 @@ class Game{
 
   start(){
     Sound.resume();if(this.wishColor===null)return;
-    this.bagsLeft=CONFIG.startBags;this.totalOpened=0;this.totalEarned=0;
+    this.bagsLeft=CONFIG.startBags+this.bonusBags;
+    this.totalOpened=0;this.totalEarned=this.bonusBags;
     this.totalMatch=0;this.totalTriple=0;this.totalFamily=0;this.combo=0;
     this.grid=new Array(9).fill(null);this.familyTriggered=false;
     this.running=true;this.busy=false;
@@ -607,7 +1113,14 @@ class Game{
     this.$('btn-restart').style.display='block';
     this.$('btn-open').disabled=false;
     this.$('combo-bar').classList.remove('show');
-    this.setMsg('点击「拆盲袋」!','剩余 '+this.bagsLeft+' 袋');Sound.play('open');
+    this.$('bonus-bar').classList.remove('show');
+
+    if(this.bonusMsg){
+      this.setMsg(this.bonusMsg,'点击「拆盲袋」!');
+    }else{
+      this.setMsg('点击「拆盲袋」!','剩余 '+this.bagsLeft+' 袋');
+    }
+    Sound.play('open');
     this.autoNext();
   }
 
@@ -619,7 +1132,9 @@ class Game{
     this.$('combo-bar').classList.remove('show');this.buildGrid();
     document.querySelectorAll('.wc-btn').forEach(b=>b.classList.remove('selected'));
     this.$('wish-dot').style.background='#555';this.wishColor=null;this.running=false;
+    this.bonusBags=0;this.bonusMsg='';
     this.setMsg('选择许愿色，开始游戏吧!','');
+    this.updateCheckinBadge();
   }
 
   autoNext(){
@@ -700,15 +1215,15 @@ class Game{
     for(const r of rewards){
       totalBags+=r.bag;
       switch(r.type){
-        case'wish':msgs.push('\u{1F3AF} 许愿碰');this.highlightWish();break;
-        case'match':this.removeTurtles(r.positions);msgs.push('\u{1F525} 同色碰');this.totalMatch++;soundType='match';break;
-        case'triple':this.removeTurtles(r.positions);msgs.push('\u{1F389} 三连');this.totalTriple++;soundType='triple';this.spawnParticles();break;
-        case'family':msgs.push('\u{1F308} 全家福');this.totalFamily++;soundType='family';this.highlightFamily();this.spawnParticles();break;
+        case'wish':msgs.push('🎯 许愿碰');this.highlightWish();break;
+        case'match':this.removeTurtles(r.positions);msgs.push('🔥 同色碰');this.totalMatch++;soundType='match';break;
+        case'triple':this.removeTurtles(r.positions);msgs.push('🎉 三连');this.totalTriple++;soundType='triple';this.spawnParticles();break;
+        case'family':msgs.push('🌈 全家福');this.totalFamily++;soundType='family';this.highlightFamily();this.spawnParticles();break;
       }
     }
     if(!soundType)soundType=rewards[0].type;Sound.play(soundType);
     this.bagsLeft+=totalBags;
-    this.$('combo-bar').textContent='\u{1F525} 连击 x'+this.combo+'  +'+totalBags+'袋';
+    this.$('combo-bar').textContent='🔥 连击 x'+this.combo+'  +'+totalBags+'袋';
     this.$('combo-bar').classList.add('show');
     const mainMsg=msgs.join(' + ');
     this.setMsg(mainMsg,'获得 +'+totalBags+' 袋!');this.showFloatMsg(mainMsg);
@@ -716,8 +1231,8 @@ class Game{
       const ec=this.grid.filter(g=>!g).length;
       if(ec===9&&this.totalMatch+this.totalTriple>0){
         Sound.play('clear');this.bagsLeft+=CONFIG.reward.clear;
-        this.setMsg('\u{1F3C6} 清台!!!','超级大奖 +'+CONFIG.reward.clear+'袋!');
-        this.showFloatMsg('\u{1F3C6} 清台! +'+CONFIG.reward.clear+'袋');this.spawnParticles();
+        this.setMsg('🏆 清台!!!','超级大奖 +'+CONFIG.reward.clear+'袋!');
+        this.showFloatMsg('🏆 清台! +'+CONFIG.reward.clear+'袋');this.spawnParticles();
       }
       this.updateUI();this.busy=false;this.$('btn-open').disabled=false;this.autoNext();
     },700);
@@ -768,11 +1283,21 @@ class Game{
   gameOver(){
     this.running=false;this.$('btn-open').style.display='none';
     setTimeout(()=>{
-      let emoji='\u{1F610}',title='游戏结束',msg='下次运气会更好!';
-      if(this.totalMatch+this.totalTriple>=8){emoji='\u{1F3C6}';title='欧皇附体!';msg='你是天选之子!'}
-      else if(this.totalMatch+this.totalTriple>=5){emoji='\u{1F31F}';title='运气不错!';msg='拆了好多乌龟!'}
-      else if(this.totalMatch+this.totalTriple>=3){emoji='\u{1F44D}';title='还可以!';msg='继续加油!'}
-      else if(this.totalEarned>CONFIG.startBags){emoji='\u{1F60A}';title='小赚!';msg='多拿了 '+(this.totalEarned-CONFIG.startBags)+' 只!'}
+      let emoji='😐',title='游戏结束',msg='下次运气会更好!';
+      if(this.totalMatch+this.totalTriple>=8){emoji='🏆';title='欧皇附体!';msg='你是天选之子!'}
+      else if(this.totalMatch+this.totalTriple>=5){emoji='🌟';title='运气不错!';msg='拆了好多乌龟!'}
+      else if(this.totalMatch+this.totalTriple>=3){emoji='👍';title='还可以!';msg='继续加油!'}
+      else if(this.totalEarned>CONFIG.startBags+this.bonusBags){emoji='😊';title='小赚!';msg='多拿了 '+(this.totalEarned-CONFIG.startBags-this.bonusBags)+' 只!'}
+
+      // Save to leaderboard
+      const score={opened:this.totalOpened,earned:this.totalEarned,match:this.totalMatch,triple:this.totalTriple};
+      const isRecord=Leaderboard.isRecord(score);
+      Leaderboard.saveScore(score);
+
+      if(isRecord&&this.totalEarned>CONFIG.startBags){
+        msg='🎉 打破纪录! '+msg;
+      }
+
       this.$('r-emoji').textContent=emoji;this.$('r-title').textContent=title;
       this.$('r-opened').textContent=this.totalOpened;this.$('r-earned').textContent=this.totalEarned;
       this.$('r-match').textContent=this.totalMatch;this.$('r-triple').textContent=this.totalTriple;
