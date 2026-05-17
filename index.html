@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>乌龟对对碰</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+  background:linear-gradient(180deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);
+  min-height:100vh;display:flex;justify-content:center;align-items:flex-start;
+  padding:8px;overflow-x:hidden;user-select:none;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(2px 2px at 10% 20%,rgba(255,255,255,.3),transparent),
+    radial-gradient(2px 2px at 30% 60%,rgba(255,255,255,.2),transparent),
+    radial-gradient(3px 3px at 50% 10%,rgba(255,255,255,.25),transparent),
+    radial-gradient(2px 2px at 70% 80%,rgba(255,255,255,.15),transparent),
+    radial-gradient(2px 2px at 90% 40%,rgba(255,255,255,.3),transparent),
+    radial-gradient(3px 3px at 15% 85%,rgba(255,255,255,.2),transparent),
+    radial-gradient(2px 2px at 85% 15%,rgba(255,255,255,.25),transparent);
+  pointer-events:none;z-index:0;animation:twinkle 4s ease-in-out infinite alternate;
+}
+@keyframes twinkle{from{opacity:.5}to{opacity:1}}
+
+#app{
+  width:100%;max-width:440px;display:flex;flex-direction:column;gap:10px;
+  padding:8px 0 24px;position:relative;z-index:1;
+}
+
+/* ===== 顶部 ===== */
+#top-bar{
+  background:linear-gradient(135deg,#e94560,#ff6b6b);border-radius:20px;
+  padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 6px 24px rgba(233,69,96,.4);color:#fff;position:relative;overflow:hidden;
+}
+#top-bar::before{
+  content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(circle at 30% 70%,rgba(255,255,255,.15),transparent 60%);
+  pointer-events:none;
+}
+#top-bar .logo{
+  font-size:22px;font-weight:900;letter-spacing:3px;
+  text-shadow:0 2px 8px rgba(0,0,0,.3);position:relative;z-index:1;
+}
+#top-bar .logo span{font-size:28px}
+
+#stats{display:flex;gap:6px;position:relative;z-index:1}
+.stat-box{
+  background:rgba(255,255,255,.2);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.3);border-radius:12px;
+  padding:4px 10px;text-align:center;min-width:54px;
+}
+.stat-box .sv{font-size:20px;font-weight:800}
+.stat-box .sl{font-size:10px;opacity:.85}
+
+#btn-rules{
+  position:absolute;top:14px;right:14px;
+  background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.3);
+  color:#fff;width:28px;height:28px;border-radius:50%;font-size:14px;
+  font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;
+}
+
+/* ===== 许愿色 ===== */
+#wish-bar{
+  background:rgba(255,255,255,.08);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.12);border-radius:16px;
+  padding:10px 14px;display:flex;align-items:center;gap:10px;
+}
+#wish-bar .wish-label{
+  font-size:14px;font-weight:700;color:rgba(255,255,255,.9);white-space:nowrap;
+}
+#wish-dot{
+  width:30px;height:30px;border-radius:50%;border:3px solid #FFD700;
+  box-shadow:0 0 12px rgba(255,215,0,.5);flex-shrink:0;transition:background .3s;
+}
+#wish-colors{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+.wc-btn{
+  width:28px;height:28px;border-radius:50%;border:2px solid transparent;
+  cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s;
+  box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+.wc-btn:hover,.wc-btn.selected{
+  transform:scale(1.3);border-color:#FFD700;box-shadow:0 0 10px rgba(255,215,0,.6);
+}
+
+/* ===== 连击条 ===== */
+#combo-bar{
+  display:none;text-align:center;padding:8px;
+  background:linear-gradient(90deg,#f7971e,#ffd200);border-radius:14px;
+  color:#1a1a2e;font-size:16px;font-weight:900;
+  box-shadow:0 4px 16px rgba(255,210,0,.3);letter-spacing:1px;
+}
+#combo-bar.show{display:block;animation:comboPulse .5s ease}
+@keyframes comboPulse{0%{transform:scale(.9)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+
+/* ===== 九宫格 ===== */
+#grid-wrap{
+  background:linear-gradient(145deg,#2d2d44,#1a1a2e);
+  border:2px solid rgba(255,255,255,.08);border-radius:22px;padding:12px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);
+}
+#grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid-cell{
+  aspect-ratio:1;background:rgba(255,255,255,.04);border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  border:2px dashed rgba(255,255,255,.08);position:relative;overflow:hidden;
+  transition:background .3s;
+}
+.grid-cell.empty::after{
+  content:'';width:22px;height:22px;border-radius:50%;
+  background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.05);
+}
+
+/* ===== 乌龟 SVG ===== */
+.turtle-svg{
+  width:92%;height:92%;
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,.35));
+}
+
+/* ===== 乌龟容器 ===== */
+.turtle-on-grid{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  border-radius:16px;
+  animation:turtleDrop .5s cubic-bezier(.34,1.56,.64,1);position:relative;
+  background:rgba(255,255,255,.05);
+  border:2px solid rgba(255,255,255,.12);
+  box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+.turtle-on-grid.wish{
+  border-color:#FFD700;box-shadow:0 0 18px rgba(255,215,0,.5);
+}
+.turtle-on-grid.wish::after{
+  content:'\2B50';position:absolute;top:-5px;right:-3px;
+  font-size:15px;animation:starSpin 1s ease infinite;
+}
+.turtle-on-grid.family-highlight{animation:familyGlow 1.5s ease infinite}
+@keyframes familyGlow{
+  0%,100%{box-shadow:0 0 10px rgba(255,215,0,.3)}
+  50%{box-shadow:0 0 25px rgba(255,215,0,.6),0 0 50px rgba(255,215,0,.3)}
+}
+
+@keyframes turtleDrop{
+  0%{transform:scale(0) rotate(-20deg);opacity:0}
+  60%{transform:scale(1.12) rotate(5deg)}
+  100%{transform:scale(1) rotate(0deg);opacity:1}
+}
+@keyframes starSpin{
+  0%,100%{transform:rotate(0deg) scale(1)}
+  50%{transform:rotate(25deg) scale(1.3)}
+}
+.turtle-on-grid.removing{animation:turtleRemove .5s ease forwards}
+@keyframes turtleRemove{
+  0%{transform:scale(1) rotate(0);opacity:1}
+  50%{transform:scale(1.4) rotate(180deg);opacity:.6}
+  100%{transform:scale(0) rotate(360deg);opacity:0}
+}
+
+/* ===== 消息 ===== */
+#msg{text-align:center;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#msg .main-msg{font-size:17px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.3)}
+#msg .sub-msg{font-size:12px;color:rgba(255,255,255,.5)}
+
+/* ===== 按钮 ===== */
+#controls{display:flex;gap:10px;padding:0 4px}
+.btn{
+  flex:1;padding:14px 8px;border:none;border-radius:16px;font-size:17px;
+  font-weight:800;cursor:pointer;transition:transform .1s;letter-spacing:1px;
+  position:relative;overflow:hidden;
+}
+.btn::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.2),transparent);
+  border-radius:16px 16px 0 0;pointer-events:none;
+}
+.btn:active{transform:scale(.95)}
+.btn:disabled{opacity:.3;pointer-events:none}
+.btn-start{background:linear-gradient(135deg,#e94560,#ff6b6b);color:#fff;box-shadow:0 4px 16px rgba(233,69,96,.4)}
+.btn-open{
+  background:linear-gradient(135deg,#00b894,#55efc4);color:#1a1a2e;
+  box-shadow:0 4px 16px rgba(0,184,148,.4);animation:btnPulse 1.5s ease infinite;
+}
+@keyframes btnPulse{
+  0%,100%{transform:scale(1);box-shadow:0 4px 16px rgba(0,184,148,.4)}
+  50%{transform:scale(1.03);box-shadow:0 6px 24px rgba(0,184,148,.6)}
+}
+.btn-restart{background:linear-gradient(135deg,#636e72,#b2bec3);color:#fff;box-shadow:0 4px 12px rgba(99,110,114,.3)}
+
+/* ===== 弹窗 ===== */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+  display:none;justify-content:center;align-items:center;z-index:300;
+}
+.modal-overlay.show{display:flex}
+.modal-box{
+  background:linear-gradient(145deg,#2d2d44,#1a1a2e);border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;padding:28px 22px;max-width:360px;width:92%;
+  max-height:80vh;overflow-y:auto;animation:popIn .3s cubic-bezier(.34,1.56,.64,1);color:#fff;
+}
+@keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-box h2{text-align:center;font-size:20px;margin-bottom:16px;color:#ffd200}
+.rule-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.rule-item:last-child{border-bottom:none}
+.rule-icon{font-size:24px;flex-shrink:0}
+.rule-title{font-weight:700;font-size:14px}
+.rule-desc{color:rgba(255,255,255,.6);font-size:12px;margin-top:2px}
+.modal-close-btn{
+  display:block;margin:18px auto 0;padding:10px 40px;
+  background:linear-gradient(135deg,#e94560,#ff6b6b);color:#fff;border:none;
+  border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;
+}
+
+/* ===== 结束弹窗 ===== */
+#result-modal{
+  background:linear-gradient(145deg,#2d2d44,#1a1a2e);border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;padding:32px 24px;max-width:340px;width:92%;text-align:center;
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1);color:#fff;
+}
+#result-modal .r-emoji{font-size:60px;margin-bottom:8px}
+#result-modal h2{font-size:26px;color:#ffd200;margin-bottom:16px}
+#result-modal .rs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}
+.rs-item{background:rgba(255,255,255,.06);border-radius:12px;padding:10px 6px}
+.rs-item .rv{font-size:26px;font-weight:800;color:#ffd200}
+.rs-item .rl{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
+#result-modal .r-msg{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:16px}
+
+/* ===== 浮动消息 ===== */
+.float-msg{
+  position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);
+  font-size:26px;font-weight:900;color:#ffd200;text-shadow:0 2px 12px rgba(0,0,0,.5);
+  pointer-events:none;z-index:500;animation:floatUp 1.2s ease forwards;white-space:nowrap;
+}
+@keyframes floatUp{
+  0%{transform:translate(-50%,-40%) scale(.3);opacity:0}
+  15%{transform:translate(-50%,-50%) scale(1.15);opacity:1}
+  70%{transform:translate(-50%,-70%) scale(1);opacity:1}
+  100%{transform:translate(-50%,-100%) scale(.7);opacity:0}
+}
+
+/* ===== 收集区 ===== */
+#collection{
+  background:rgba(255,255,255,.06);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px;
+}
+#collection .col-title{
+  font-size:13px;font-weight:600;color:rgba(255,255,255,.5);
+  margin-bottom:8px;text-align:center;
+}
+#col-items{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.col-item{
+  width:34px;height:34px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  animation:popIn .3s ease;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);box-shadow:0 2px 6px rgba(0,0,0,.2);
+  overflow:hidden;
+}
+.col-item svg{width:100%;height:100%}
+
+/* ===== 音效开关 ===== */
+#sound-toggle{
+  position:fixed;bottom:12px;right:12px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  color:#fff;width:40px;height:40px;border-radius:50%;font-size:20px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  z-index:100;transition:background .2s;
+}
+#sound-toggle:hover{background:rgba(255,255,255,.2)}
+
+/* ===== 粒子 ===== */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:400;overflow:hidden}
+.particle{
+  position:absolute;width:8px;height:8px;border-radius:50%;
+  animation:particleFall 1.5s ease forwards;
+}
+@keyframes particleFall{
+  0%{transform:translateY(0) scale(1);opacity:1}
+  100%{transform:translateY(100vh) scale(0);opacity:0}
+}
+
+@media(max-width:380px){
+  .wc-btn{width:24px;height:24px}
+  #top-bar .logo{font-size:18px}
+  .stat-box .sv{font-size:17px}
+  .stat-box{min-width:48px;padding:4px 6px}
+  #grid{gap:6px}
+}
+</style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<div id="app">
+  <div id="top-bar">
+    <div class="logo"><span>&#x1F422;</span> 乌龟对对碰</div>
+    <div id="stats">
+      <div class="stat-box"><div class="sv" id="s-bags">0</div><div class="sl">剩余</div></div>
+      <div class="stat-box"><div class="sv" id="s-opened">0</div><div class="sl">已拆</div></div>
+      <div class="stat-box"><div class="sv" id="s-earned">0</div><div class="sl">获得</div></div>
+    </div>
+    <button id="btn-rules">?</button>
+  </div>
+
+  <div id="wish-bar">
+    <span class="wish-label">&#x1F3AF; 许愿:</span>
+    <div id="wish-dot" style="background:#555"></div>
+    <div id="wish-colors"></div>
+  </div>
+
+  <div id="combo-bar">&#x1F525; 连击 x1  +1袋</div>
+
+  <div id="grid-wrap"><div id="grid"></div></div>
+
+  <div id="msg">
+    <div class="main-msg" id="msg-main">选择许愿色，开始游戏吧!</div>
+    <div class="sub-msg" id="msg-sub"></div>
+  </div>
+
+  <div id="controls">
+    <button class="btn btn-start" id="btn-start" disabled>&#x1F3AE; 开始游戏</button>
+    <button class="btn btn-open" id="btn-open" style="display:none">&#x1F381; 拆盲袋!</button>
+    <button class="btn btn-restart" id="btn-restart" style="display:none">&#x1F504; 重开</button>
+  </div>
+
+  <div id="collection">
+    <div class="col-title">&#x1F392; 本次获得的乌龟</div>
+    <div id="col-items"></div>
+  </div>
+</div>
+
+<!-- 规则 -->
+<div id="rules-overlay" class="modal-overlay">
+  <div class="modal-box">
+    <h2>&#x1F422; 游戏规则</h2>
+    <div class="rule-item"><span class="rule-icon">&#x1F3AF;</span><div><div class="rule-title">许愿色 +1袋</div><div class="rule-desc">拆出许愿色 → 额外获得1袋</div></div></div>
+    <div class="rule-item"><span class="rule-icon">&#x1F525;</span><div><div class="rule-title">同色碰 +1袋</div><div class="rule-desc">出现两只同色乌龟 → 消除并 +1袋</div></div></div>
+    <div class="rule-item"><span class="rule-icon">&#x1F389;</span><div><div class="rule-title">三连 +3袋</div><div class="rule-desc">横/竖/斜三连同色 → 消除并 +3袋</div></div></div>
+    <div class="rule-item"><span class="rule-icon">&#x1F308;</span><div><div class="rule-title">全家福 +3袋</div><div class="rule-desc">场上出现 8 种不同颜色的乌龟 → +3袋</div></div></div>
+    <div class="rule-item"><span class="rule-icon">&#x1F3C6;</span><div><div class="rule-title">清台 +5袋</div><div class="rule-desc">九宫格全部清空 → 超级大奖 +5袋!</div></div></div>
+    <div class="rule-item"><span class="rule-icon">&#x267E;&#xFE0F;</span><div><div class="rule-title">连锁反应</div><div class="rule-desc">奖励的袋子继续拆，满足条件就一直拆!</div></div></div>
+    <button class="modal-close-btn" id="rules-close">知道了</button>
+  </div>
+</div>
+
+<!-- 结束 -->
+<div id="result-overlay" class="modal-overlay">
+  <div id="result-modal" class="modal-box">
+    <div class="r-emoji" id="r-emoji">&#x1F389;</div>
+    <h2 id="r-title">游戏结束!</h2>
+    <div class="rs">
+      <div class="rs-item"><div class="rv" id="r-opened">0</div><div class="rl">共拆</div></div>
+      <div class="rs-item"><div class="rv" id="r-earned">0</div><div class="rl">获得</div></div>
+      <div class="rs-item"><div class="rv" id="r-match">0</div><div class="rl">对碰</div></div>
+      <div class="rs-item"><div class="rv" id="r-triple">0</div><div class="rl">三连</div></div>
+    </div>
+    <p class="r-msg" id="r-msg"></p>
+    <button class="btn btn-start" id="r-btn" style="min-width:180px;margin:0 auto">&#x1F3AE; 再来一局</button>
+  </div>
+</div>
+
+<button id="sound-toggle" title="音效开关">&#x1F50A;</button>
+
+<script>
+// ============================================================
+//  SOUND
+// ============================================================
+const Sound={
+  ctx:null,enabled:true,
+  init(){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){this.enabled=false}},
+  resume(){if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume()},
+  play(type){
+    if(!this.enabled||!this.ctx)return;this.resume();const t=this.ctx.currentTime;
+    switch(type){
+      case'open':this._t(523,.08,'triangle',t);break;
+      case'wish':this._m([659,784,1047],.1,t);break;
+      case'match':this._m([523,659,784],.08,t);break;
+      case'triple':this._m([523,659,784,1047],.1,t);break;
+      case'family':this._m([523,659,784,1047,1319],.12,t);break;
+      case'clear':this._f(t);break;
+      case'fail':this._t(220,.15,'sine',t);break;
+      case'win':this._m([523,659,784,1047,784,1047,1319],.15,t);break;
+    }
+  },
+  _t(f,d,w,t){
+    const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type=w;o.frequency.setValueAtTime(f,t);
+    g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);
+    o.connect(g).connect(this.ctx.destination);o.start(t);o.stop(t+d);
+  },
+  _m(fs,d,t){fs.forEach((f,i)=>this._t(f,d,'triangle',t+i*d))},
+  _f(t){[784,988,1175,1319].forEach((f,i)=>this._t(f,.15,'square',t+i*.12));this._t(1568,.3,'triangle',t+.48)}
+};
+
+// ============================================================
+//  CONFIG
+// ============================================================
+const COLORS=[
+  {name:'红色',hex:'#E53935'},
+  {name:'橙色',hex:'#FB8C00'},
+  {name:'黄色',hex:'#FDD835'},
+  {name:'绿色',hex:'#43A047'},
+  {name:'蓝色',hex:'#1E88E5'},
+  {name:'紫色',hex:'#8E24AA'},
+  {name:'粉色',hex:'#D81B60'},
+  {name:'青色',hex:'#00ACC1'},
+  {name:'棕色',hex:'#6D4C41'},
+  {name:'白色',hex:'#90A4AE'},
+];
+
+const CONFIG={
+  startBags:9,colorCount:10,gridSize:9,
+  familyCount:8,
+  reward:{wish:1,match:1,triple:3,family:3,clear:5},
+  autoDelay:800,
+};
+
+const TRIPLES=[
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6],
+];
+
+// ============================================================
+//  SVG TURTLE GENERATOR
+// ============================================================
+function turtleSVG(hex){
+  // 颜色计算
+  const rgb=hexToRgb(hex);
+  const dark=shadeColor(hex,-35);
+  const dk2=shadeColor(hex,-55);
+  const light=shadeColor(hex,50);
+  const lt2=shadeColor(hex,75);
+  const rim=shadeColor(hex,-20);
+  const shellMid=shadeColor(hex,-10);
+
+  // 定义渐变
+  const gid='g'+Math.random().toString(36).substr(2,6);
+  const lid='l'+Math.random().toString(36).substr(2,6);
+
+  return '<svg viewBox="0 0 120 120" class="turtle-svg" xmlns="http://www.w3.org/2000/svg">'+
+    '<defs>'+
+      '<linearGradient id="'+gid+'" x1="0%" y1="0%" x2="0%" y2="100%">'+
+        '<stop offset="0%" stop-color="'+light+'"/>'+
+        '<stop offset="100%" stop-color="'+dark+'"/>'+
+      '</linearGradient>'+
+      '<linearGradient id="'+lid+'" x1="0%" y1="0%" x2="100%" y2="100%">'+
+        '<stop offset="0%" stop-color="'+lt2+'"/>'+
+        '<stop offset="100%" stop-color="'+light+'"/>'+
+      '</linearGradient>'+
+    '</defs>'+
+
+    // ===== 尾巴 =====
+    '<path d="M96 64 Q102 60 108 58 Q104 62 106 66 Q100 68 96 66Z" fill="'+dark+'" stroke="'+dk2+'" stroke-width=".5"/>'+
+
+    // ===== 后腿 =====
+    '<ellipse cx="86" cy="84" rx="13" ry="6" fill="url(#'+gid+')" stroke="'+dark+'" stroke-width=".5" transform="rotate(-25,86,84)"/>'+
+    '<ellipse cx="86" cy="36" rx="13" ry="6" fill="url(#'+gid+')" stroke="'+dark+'" stroke-width=".5" transform="rotate(25,86,36)"/>'+
+    // 脚趾
+    '<circle cx="95" cy="89" r="2.5" fill="'+dark+'"/>'+
+    '<circle cx="99" cy="86" r="2.2" fill="'+dark+'"/>'+
+    '<circle cx="95" cy="31" r="2.5" fill="'+dark+'"/>'+
+    '<circle cx="99" cy="34" r="2.2" fill="'+dark+'"/>'+
+
+    // ===== 前腿 =====
+    '<ellipse cx="40" cy="86" rx="14" ry="6.5" fill="url(#'+gid+')" stroke="'+dark+'" stroke-width=".5" transform="rotate(-20,40,86)"/>'+
+    '<ellipse cx="40" cy="34" rx="14" ry="6.5" fill="url(#'+gid+')" stroke="'+dark+'" stroke-width=".5" transform="rotate(20,40,34)"/>'+
+    // 脚趾
+    '<circle cx="28" cy="92" r="2.8" fill="'+dark+'"/>'+
+    '<circle cx="24" cy="88" r="2.5" fill="'+dark+'"/>'+
+    '<circle cx="28" cy="28" r="2.8" fill="'+dark+'"/>'+
+    '<circle cx="24" cy="32" r="2.5" fill="'+dark+'"/>'+
+
+    // ===== 头部 =====
+    '<ellipse cx="20" cy="60" rx="15" ry="14" fill="url(#'+lid+')" stroke="'+rim+'" stroke-width=".8"/>'+
+    // 头顶
+    '<ellipse cx="20" cy="50" rx="12" ry="6" fill="'+lt2+'" opacity=".4"/>'+
+
+    // ===== 眼睛 (大眼萌) =====
+    // 左眼白
+    '<ellipse cx="15" cy="56" rx="5" ry="5.5" fill="#fff" stroke="'+shadeColor(hex,-15)+'" stroke-width=".3"/>'+
+    // 左瞳孔
+    '<circle cx="14" cy="56.5" r="3.2" fill="#2C2C2C"/>'+
+    '<circle cx="15.5" cy="55" r="1.4" fill="#fff"/>'+
+    '<circle cx="12.5" cy="57.5" r=".6" fill="#fff"/>'+
+
+    // 右眼白
+    '<ellipse cx="27" cy="56" rx="5" ry="5.5" fill="#fff" stroke="'+shadeColor(hex,-15)+'" stroke-width=".3"/>'+
+    // 右瞳孔
+    '<circle cx="26" cy="56.5" r="3.2" fill="#2C2C2C"/>'+
+    '<circle cx="27.5" cy="55" r="1.4" fill="#fff"/>'+
+    '<circle cx="24.5" cy="57.5" r=".6" fill="#fff"/>'+
+
+    // ===== 腮红 =====
+    '<ellipse cx="10" cy="63" rx="4" ry="2.5" fill="#FF8A80" opacity=".45"/>'+
+    '<ellipse cx="30" cy="63" rx="4" ry="2.5" fill="#FF8A80" opacity=".45"/>'+
+
+    // ===== 嘴巴 =====
+    '<path d="M17 64 Q20 68 23 64" stroke="#5D4037" stroke-width="1.2" fill="none" stroke-linecap="round"/>'+
+
+    // ===== 龟壳 (主壳) =====
+    '<ellipse cx="62" cy="60" rx="36" ry="28" fill="url(#'+gid+')" stroke="'+rim+'" stroke-width="1.5"/>'+
+    // 壳高光
+    '<ellipse cx="50" cy="46" rx="16" ry="10" fill="'+lt2+'" opacity=".45" transform="rotate(-12,50,46)"/>'+
+    '<ellipse cx="52" cy="44" rx="8" ry="5" fill="'+lt2+'" opacity=".3" transform="rotate(-12,52,44)"/>'+
+
+    // ===== 壳面花纹 =====
+    // 中心六边形
+    '<polygon points="62,40 74,47 74,59 62,66 50,59 50,47" fill="none" stroke="'+dk2+'" stroke-width="1.8" opacity=".35"/>'+
+    '<polygon points="62,44 70,49 70,57 62,62 54,57 54,49" fill="'+dk2+'" opacity=".1"/>'+
+    // 左六边形
+    '<polygon points="46,52 54,47 54,59 46,64 38,59 38,47" fill="none" stroke="'+dk2+'" stroke-width="1.2" opacity=".2"/>'+
+    // 右六边形
+    '<polygon points="78,52 86,47 86,59 78,64 70,59 70,47" fill="none" stroke="'+dk2+'" stroke-width="1.2" opacity=".2"/>'+
+    // 上六边形
+    '<polygon points="62,34 70,39 70,47 62,52 54,47 54,39" fill="none" stroke="'+dk2+'" stroke-width="1" opacity=".15"/>'+
+    // 下六边形
+    '<polygon points="62,68 70,63 70,71 62,76 54,71 54,63" fill="none" stroke="'+dk2+'" stroke-width="1" opacity=".15"/>'+
+
+    // 壳缘装饰点
+    '<circle cx="30" cy="50" r="2" fill="'+dk2+'" opacity=".2"/>'+
+    '<circle cx="30" cy="70" r="2" fill="'+dk2+'" opacity=".2"/>'+
+    '<circle cx="94" cy="50" r="2" fill="'+dk2+'" opacity=".2"/>'+
+    '<circle cx="94" cy="70" r="2" fill="'+dk2+'" opacity=".2"/>'+
+  '</svg>';
+}
+
+// 颜色工具
+function hexToRgb(hex){
+  return{
+    r:parseInt(hex.slice(1,3),16),
+    g:parseInt(hex.slice(3,5),16),
+    b:parseInt(hex.slice(5,7),16)
+  };
+}
+
+function shadeColor(hex,pct){
+  let r=Math.min(255,Math.max(0,parseInt(hex.slice(1,3),16)+pct));
+  let g=Math.min(255,Math.max(0,parseInt(hex.slice(3,5),16)+pct));
+  let b=Math.min(255,Math.max(0,parseInt(hex.slice(5,7),16)+pct));
+  return 'rgb('+r+','+g+','+b+')';
+}
+
+// ============================================================
+//  GAME
+// ============================================================
+class Game{
+  constructor(){
+    this.$=id=>document.getElementById(id);
+    this.gridEls=[];this.grid=new Array(9).fill(null);
+    this.wishColor=null;this.bagsLeft=0;this.totalOpened=0;this.totalEarned=0;
+    this.totalMatch=0;this.totalTriple=0;this.totalFamily=0;this.combo=0;
+    this.running=false;this.busy=false;this.familyTriggered=false;
+    this.buildGrid();this.buildWishColors();Sound.init();
+
+    this.$('btn-start').addEventListener('click',()=>this.start());
+    this.$('btn-open').addEventListener('click',()=>{Sound.resume();this.openOne()});
+    this.$('btn-restart').addEventListener('click',()=>this.restart());
+    this.$('r-btn').addEventListener('click',()=>this.restart());
+    this.$('btn-rules').addEventListener('click',()=>this.$('rules-overlay').classList.add('show'));
+    this.$('rules-close').addEventListener('click',()=>this.$('rules-overlay').classList.remove('show'));
+    this.$('rules-overlay').addEventListener('click',e=>{if(e.target===this.$('rules-overlay'))this.$('rules-overlay').classList.remove('show')});
+    this.$('sound-toggle').addEventListener('click',()=>this.toggleSound());
+    document.addEventListener('click',()=>Sound.resume(),{once:true});
+  }
+
+  toggleSound(){Sound.enabled=!Sound.enabled;this.$('sound-toggle').textContent=Sound.enabled?'\u{1F50A}':'\u{1F507}'}
+
+  buildGrid(){
+    const g=this.$('grid');g.innerHTML='';this.gridEls=[];
+    for(let i=0;i<9;i++){
+      const c=document.createElement('div');c.className='grid-cell empty';
+      g.appendChild(c);this.gridEls.push(c);
+    }
+  }
+
+  buildWishColors(){
+    const w=this.$('wish-colors');w.innerHTML='';
+    COLORS.forEach((c,i)=>{
+      const b=document.createElement('div');b.className='wc-btn';
+      b.style.background=c.hex;b.title=c.name;
+      b.addEventListener('click',()=>this.selectWish(i,b));w.appendChild(b);
+    });
+  }
+
+  selectWish(idx,btn){
+    if(this.running)return;
+    document.querySelectorAll('.wc-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');this.wishColor=idx;
+    this.$('wish-dot').style.background=COLORS[idx].hex;
+    this.$('btn-start').disabled=false;
+    this.setMsg('许愿色: '+COLORS[idx].name+' ✅','点击开始游戏');Sound.play('open');
+  }
+
+  start(){
+    Sound.resume();if(this.wishColor===null)return;
+    this.bagsLeft=CONFIG.startBags;this.totalOpened=0;this.totalEarned=0;
+    this.totalMatch=0;this.totalTriple=0;this.totalFamily=0;this.combo=0;
+    this.grid=new Array(9).fill(null);this.familyTriggered=false;
+    this.running=true;this.busy=false;
+    this.buildGrid();this.updateUI();this.$('col-items').innerHTML='';
+    this.$('wish-bar').style.display='none';
+    this.$('btn-start').style.display='none';
+    this.$('btn-open').style.display='block';
+    this.$('btn-restart').style.display='block';
+    this.$('btn-open').disabled=false;
+    this.$('combo-bar').classList.remove('show');
+    this.setMsg('点击「拆盲袋」!','剩余 '+this.bagsLeft+' 袋');Sound.play('open');
+    this.autoNext();
+  }
+
+  restart(){
+    this.$('result-overlay').classList.remove('show');
+    this.$('wish-bar').style.display='flex';
+    this.$('btn-start').style.display='block';this.$('btn-start').disabled=true;
+    this.$('btn-open').style.display='none';this.$('btn-restart').style.display='none';
+    this.$('combo-bar').classList.remove('show');this.buildGrid();
+    document.querySelectorAll('.wc-btn').forEach(b=>b.classList.remove('selected'));
+    this.$('wish-dot').style.background='#555';this.wishColor=null;this.running=false;
+    this.setMsg('选择许愿色，开始游戏吧!','');
+  }
+
+  autoNext(){
+    if(!this.running)return;
+    if(this.bagsLeft>0&&!this.busy){
+      setTimeout(()=>this.openOne(),CONFIG.autoDelay+Math.random()*200);
+    }else if(this.bagsLeft===0&&!this.busy){this.gameOver()}
+  }
+
+  openOne(){
+    if(this.bagsLeft<=0||this.busy||!this.running)return;
+    this.busy=true;this.$('btn-open').disabled=true;
+    this.bagsLeft--;this.totalOpened++;this.combo++;
+    const ci=Math.floor(Math.random()*CONFIG.colorCount);
+    this.addCollection(ci);this.totalEarned++;this.updateUI();
+    const pos=this.findEmpty();
+    if(pos===-1){this.setMsg('九宫格已满! 等待消除...','');this.busy=false;this.gameOver();return}
+    Sound.play('open');this.placeTurtle(pos,ci);
+    this.setMsg('拆出了 '+COLORS[ci].name+' 乌龟!','连击 x'+this.combo);
+    setTimeout(()=>{
+      this.familyTriggered=false;
+      const rewards=this.checkAll(pos,ci);
+      if(rewards.length>0){
+        Sound.play(rewards[0].type==='wish'?'wish':rewards[0].type);
+        this.processRewards(rewards);
+      }else{
+        Sound.play('fail');this.combo=0;
+        this.$('combo-bar').classList.remove('show');
+        this.clearFamilyHighlight();this.busy=false;
+        this.$('btn-open').disabled=false;this.autoNext();
+      }
+    },350);
+  }
+
+  findEmpty(){for(let i=0;i<9;i++){if(!this.grid[i])return i}return-1}
+
+  placeTurtle(pos,ci){
+    const cell=this.gridEls[pos];cell.classList.remove('empty');
+    const t=document.createElement('div');t.className='turtle-on-grid';
+    t.dataset.color=ci;
+    if(ci===this.wishColor)t.classList.add('wish');
+    t.innerHTML=turtleSVG(COLORS[ci].hex);
+    cell.innerHTML='';cell.appendChild(t);
+    this.grid[pos]={colorIndex:ci,el:t};
+  }
+
+  checkAll(newPos,newColor){
+    const rewards=[];
+    if(newColor===this.wishColor)rewards.push({type:'wish',bag:CONFIG.reward.wish});
+
+    let tripleHit=false;
+    for(const t of TRIPLES){
+      if(!t.includes(newPos))continue;
+      const[a,b,c]=t;
+      if(this.grid[a]&&this.grid[b]&&this.grid[c]&&
+         this.grid[a].colorIndex===this.grid[b].colorIndex&&
+         this.grid[b].colorIndex===this.grid[c].colorIndex){
+        rewards.push({type:'triple',positions:t,bag:CONFIG.reward.triple});tripleHit=true;break;
+      }
+    }
+
+    if(!tripleHit){
+      const cc={};
+      this.grid.forEach((g,i)=>{if(!g)return;if(!cc[g.colorIndex])cc[g.colorIndex]=[];cc[g.colorIndex].push(i)});
+      for(const[ci,pos]of Object.entries(cc)){if(pos.length>=2){rewards.push({type:'match',positions:pos.slice(0,2),bag:CONFIG.reward.match});break}}
+    }
+
+    const active=this.grid.filter(g=>g&&!g.eliminating);
+    const uc=new Set(active.map(g=>g.colorIndex));
+    if(uc.size>=CONFIG.familyCount&&!this.familyTriggered){
+      rewards.push({type:'family',bag:CONFIG.reward.family});this.familyTriggered=true;
+    }
+    return rewards;
+  }
+
+  processRewards(rewards){
+    let totalBags=0,msgs=[],soundType=null;
+    for(const r of rewards){
+      totalBags+=r.bag;
+      switch(r.type){
+        case'wish':msgs.push('\u{1F3AF} 许愿碰');this.highlightWish();break;
+        case'match':this.removeTurtles(r.positions);msgs.push('\u{1F525} 同色碰');this.totalMatch++;soundType='match';break;
+        case'triple':this.removeTurtles(r.positions);msgs.push('\u{1F389} 三连');this.totalTriple++;soundType='triple';this.spawnParticles();break;
+        case'family':msgs.push('\u{1F308} 全家福');this.totalFamily++;soundType='family';this.highlightFamily();this.spawnParticles();break;
+      }
+    }
+    if(!soundType)soundType=rewards[0].type;Sound.play(soundType);
+    this.bagsLeft+=totalBags;
+    this.$('combo-bar').textContent='\u{1F525} 连击 x'+this.combo+'  +'+totalBags+'袋';
+    this.$('combo-bar').classList.add('show');
+    const mainMsg=msgs.join(' + ');
+    this.setMsg(mainMsg,'获得 +'+totalBags+' 袋!');this.showFloatMsg(mainMsg);
+    setTimeout(()=>{
+      const ec=this.grid.filter(g=>!g).length;
+      if(ec===9&&this.totalMatch+this.totalTriple>0){
+        Sound.play('clear');this.bagsLeft+=CONFIG.reward.clear;
+        this.setMsg('\u{1F3C6} 清台!!!','超级大奖 +'+CONFIG.reward.clear+'袋!');
+        this.showFloatMsg('\u{1F3C6} 清台! +'+CONFIG.reward.clear+'袋');this.spawnParticles();
+      }
+      this.updateUI();this.busy=false;this.$('btn-open').disabled=false;this.autoNext();
+    },700);
+  }
+
+  removeTurtles(positions){
+    for(const pos of positions){if(!this.grid[pos])continue;const t=this.grid[pos];if(t.el)t.el.classList.add('removing');t.eliminating=true}
+    setTimeout(()=>{for(const pos of positions){this.grid[pos]=null;const c=this.gridEls[pos];c.classList.add('empty');c.innerHTML=''}this.clearFamilyHighlight()},500);
+  }
+
+  highlightWish(){this.grid.forEach(g=>{if(g&&g.el&&g.colorIndex===this.wishColor){g.el.style.animation='none';void g.el.offsetWidth;g.el.style.animation='turtleDrop .3s ease'}})}
+  highlightFamily(){this.grid.forEach(g=>{if(g&&g.el)g.el.classList.add('family-highlight')})}
+  clearFamilyHighlight(){this.grid.forEach(g=>{if(g&&g.el)g.el.classList.remove('family-highlight')})}
+
+  spawnParticles(){
+    const c=this.$('particles');
+    const cols=['#FFD700','#FF6B6B','#4CAF50','#2196F3','#E91E63','#FF9800'];
+    for(let i=0;i<20;i++){
+      const p=document.createElement('div');p.className='particle';
+      p.style.left=Math.random()*100+'%';p.style.top=Math.random()*50+'%';
+      p.style.background=cols[Math.floor(Math.random()*cols.length)];
+      p.style.animationDelay=Math.random()*.5+'s';
+      p.style.width=p.style.height=(4+Math.random()*8)+'px';
+      c.appendChild(p);setTimeout(()=>p.remove(),2500);
+    }
+  }
+
+  addCollection(ci){
+    const el=document.createElement('div');el.className='col-item';
+    el.style.background='rgba(255,255,255,.04)';
+    el.innerHTML=turtleSVG(COLORS[ci].hex);
+    this.$('col-items').appendChild(el);
+  }
+
+  updateUI(){
+    this.$('s-bags').textContent=this.bagsLeft;
+    this.$('s-opened').textContent=this.totalOpened;
+    this.$('s-earned').textContent=this.totalEarned;
+  }
+
+  setMsg(m,s){this.$('msg-main').textContent=m;this.$('msg-sub').textContent=s||''}
+
+  showFloatMsg(t){
+    const e=document.createElement('div');e.className='float-msg';e.textContent=t;
+    document.body.appendChild(e);setTimeout(()=>e.remove(),1300);
+  }
+
+  gameOver(){
+    this.running=false;this.$('btn-open').style.display='none';
+    setTimeout(()=>{
+      let emoji='\u{1F610}',title='游戏结束',msg='下次运气会更好!';
+      if(this.totalMatch+this.totalTriple>=8){emoji='\u{1F3C6}';title='欧皇附体!';msg='你是天选之子!'}
+      else if(this.totalMatch+this.totalTriple>=5){emoji='\u{1F31F}';title='运气不错!';msg='拆了好多乌龟!'}
+      else if(this.totalMatch+this.totalTriple>=3){emoji='\u{1F44D}';title='还可以!';msg='继续加油!'}
+      else if(this.totalEarned>CONFIG.startBags){emoji='\u{1F60A}';title='小赚!';msg='多拿了 '+(this.totalEarned-CONFIG.startBags)+' 只!'}
+      this.$('r-emoji').textContent=emoji;this.$('r-title').textContent=title;
+      this.$('r-opened').textContent=this.totalOpened;this.$('r-earned').textContent=this.totalEarned;
+      this.$('r-match').textContent=this.totalMatch;this.$('r-triple').textContent=this.totalTriple;
+      this.$('r-msg').textContent=msg;this.$('result-overlay').classList.add('show');Sound.play('win');
+    },600);
+  }
+}
+
+new Game();
+</script>
+</body>
+</html>
